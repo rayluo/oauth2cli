@@ -10,6 +10,7 @@ class MinimalHttpClient:
         self.timeout = timeout
 
     def post(self, url, params=None, data=None, headers=None, **kwargs):
+        assert isinstance(data, str)
         return MinimalResponse(requests_resp=self.session.post(
             url, params=params, data=data, headers=headers,
             timeout=self.timeout))

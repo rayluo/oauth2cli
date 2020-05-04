@@ -213,7 +213,7 @@ class BaseClient(object):
             raise ValueError("token_endpoint not found in configuration")
         resp = (post or self._http_client.post)(
             self.configuration["token_endpoint"],
-            headers=_headers, params=params, data=_data,
+            headers=_headers, params=params, data=urlencode(_data),
             **kwargs)
         if resp.status_code >= 500:
             resp.raise_for_status()  # TODO: Will probably retry here
@@ -280,8 +280,12 @@ class Client(BaseClient):  # We choose to implement all 4 grants in 1 class
         DAE = "device_authorization_endpoint"
         if not self.configuration.get(DAE):
             raise ValueError("You need to provide device authorization endpoint")
-        resp = self._http_client.post(self.configuration[DAE],
-            data={"client_id": self.client_id, "scope": self._stringify(scope or [])},
+        resp = self._http_client.post(
+            self.configuration[DAE],
+            data=urlencode({
+                "client_id": self.client_id,
+                "scope": self._stringify(scope or []),
+                }),
             headers=dict(self.default_headers, **kwargs.pop("headers", {})),
             **kwargs)
         flow = json.loads(resp.text)
